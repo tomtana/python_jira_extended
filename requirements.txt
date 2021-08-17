@@ -1,0 +1,6 @@
+python_version > '3.5'
+jira
+numpy
+oauthlib
+pandas
+python-box
