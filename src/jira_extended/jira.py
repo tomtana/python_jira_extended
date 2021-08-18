@@ -14,8 +14,14 @@ import logging
 
 class JIRA_EXT(JIRA):
     def __init__(self, *args, logger=logging.getLogger('jira_ext'), **kwargs):
-        super(JIRA_EXT, self).__init__(*args, **kwargs)
         self.__logger = logger
+        self.__issue_cache = collections.OrderedDict()
+
+    def login(self , *args, logger=logging.getLogger('jira_ext'), **kwargs):
+        """
+        Calls the super __init__ function. Needed to separate the init step.
+        """
+        super(JIRA_EXT, self).__init__(*args, **kwargs)
 
     @translate_resource_args
     def sprint_scope_and_burndown_chart(self, board_id, sprint_id):
@@ -181,9 +187,9 @@ class JIRA_EXT(JIRA):
         """
         i = super(JIRA_EXT, self).issue(id, fields, expand)
         if translate_custom_field_name:
-            i = IssueExt(i, field_mapping=self.get_field_mapping(i), JIRA_EXT=self)
+            i = IssueExt(i, field_mapping=self.get_field_mapping(i), jira_ext=self)
         else:
-            i = IssueExt(i, JIRA_EXT=self)
+            i = IssueExt(i, jira_ext=self)
         if cache:
             self.update_issue_cache([i])
         return i
@@ -191,9 +197,9 @@ class JIRA_EXT(JIRA):
     def search_issues(self, *args, cache_result=True, translate_custom_field_name=True, **kwargs):
         issues = super(JIRA_EXT, self).search_issues(*args, **kwargs)
         if translate_custom_field_name:
-            issues = ResultList([IssueExt(i, field_mapping=self.get_field_mapping(i), JIRA_EXT=self) for i in issues])
+            issues = ResultList([IssueExt(i, field_mapping=self.get_field_mapping(i), jira_ext=self) for i in issues])
         else:
-            issues = ResultList([IssueExt(i, JIRA_EXT=self) for i in issues])
+            issues = ResultList([IssueExt(i, jira_ext=self) for i in issues])
         if cache_result:
             self.update_issue_cache(issues)
         return issues
@@ -477,7 +483,7 @@ class IssueExt(Issue):
     +   customfield names are translated to sanitized given name (works only with GCIPJira)
     """
 
-    def __init__(self, issue=None, field_mapping=None, JIRA_EXT=None, *args, **kwargs):
+    def __init__(self, issue=None, field_mapping=None, jira_ext=None, *args, **kwargs):
         if isinstance(issue, Issue):
             kwargs = {'options': issue._options,
                       'raw': issue.raw,
@@ -488,7 +494,7 @@ class IssueExt(Issue):
             self.__field_mapping = collections.defaultdict(lambda: None)
         super(IssueExt, self).__init__(*args, **kwargs)
         self._parse_raw(self.raw)
-        self.__jira = JIRA_EXT
+        self.__jira = jira_ext
 
     def __str__(self):
         return f"<{self.key}>\t\t<{self.fields.summary}>"
