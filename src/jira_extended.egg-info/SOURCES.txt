@@ -2,6 +2,8 @@ LICENSE
 README.md
 pyproject.toml
 setup.py
+src/jira_extended/__init__.py
+src/jira_extended/jira_extended.py
 src/jira_extended.egg-info/PKG-INFO
 src/jira_extended.egg-info/SOURCES.txt
 src/jira_extended.egg-info/dependency_links.txt
