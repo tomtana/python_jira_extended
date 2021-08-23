@@ -14,14 +14,16 @@ import logging
 
 class JIRA_EXT(JIRA):
     def __init__(self, *args, logger=logging.getLogger('jira_ext'), **kwargs):
+        super(JIRA_EXT, self).__init__(*args, **kwargs)
+        self._init_class_properties(logger)
+
+    def _init_class_properties(self, logger=logging.getLogger('jira_ext')):
+        """
+        dirty workaround since child class will need to init the added properties but no super.__init__ can be called
+        """
         self.__logger = logger
         self.__issue_cache = collections.OrderedDict()
-
-    def login(self , *args, logger=logging.getLogger('jira_ext'), **kwargs):
-        """
-        Calls the super __init__ function. Needed to separate the init step.
-        """
-        super(JIRA_EXT, self).__init__(*args, **kwargs)
+        self._field_mappings = collections.defaultdict(lambda: collections.defaultdict(lambda: None))
 
     @translate_resource_args
     def sprint_scope_and_burndown_chart(self, board_id, sprint_id):

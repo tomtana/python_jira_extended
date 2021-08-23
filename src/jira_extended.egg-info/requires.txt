@@ -1,4 +1,4 @@
-jira
-numpy
 pandas
+numpy
+jira
 python-box

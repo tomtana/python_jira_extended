@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: jira-extended
+Version: 0.0.1
+Summary: This package extendes the standard jira-python capabilities.
+Home-page: https://github.com/tomtana/python_jira_extended
+Author: Thomas Fontana
+Author-email: thomas@fontana.onl
+License: UNKNOWN
+Project-URL: Bug Tracker, https://github.com/tomtana/python_jira_extended/issues
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+documentation yet to be done
+
