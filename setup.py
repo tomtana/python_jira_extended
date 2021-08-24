@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="jira_extended",
-    version="0.0.1",
+    version="0.0.2",
     author="Thomas Fontana",
     author_email="thomas@fontana.onl",
     description="This package extendes the standard jira-python capabilities.",
