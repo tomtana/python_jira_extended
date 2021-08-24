@@ -1,2 +1,4 @@
 /venv/
 /.idea/
+/dist/
+/jira_extended/jira_extended.egg-info/
