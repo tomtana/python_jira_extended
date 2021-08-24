@@ -1,1 +1,1 @@
-from jira_extended import *
+from jira_extended.jira_extended import *
