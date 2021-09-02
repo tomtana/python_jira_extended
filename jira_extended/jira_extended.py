@@ -573,6 +573,11 @@ class ResultListExt(ResultList):
         super(ResultListExt, self).__init__(iterable, **kwargs)
         self.mapping = mapping
 
+    def __getitem__(self, index):
+        retval = super(ResultListExt, self).__getitem__(index)
+        retval = type(self)(retval)
+        return retval
+
     def raw(self):
         """
         export raw content of each issue
