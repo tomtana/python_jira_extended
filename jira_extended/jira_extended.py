@@ -246,13 +246,13 @@ class JIRA_EXT(JIRA):
 
     def get_from_issue_cache(self, key_list):
         if not key_list:
-            return []
+            return ResultListExt()
         key_list = self._listify(key_list)
 
         if isinstance(key_list[0], Issue):
             key_list = [i.key for i in key_list]
 
-        result_in_cache = []
+        result_in_cache = ResultListExt()
         for k in key_list:
             if k in self.__issue_cache:
                 result_in_cache.append(self.__issue_cache[k])
@@ -260,11 +260,11 @@ class JIRA_EXT(JIRA):
 
     def get_uncached_issues(self, key_list):
         if not key_list:
-            return []
+            return ResultListExt()
         key_list = self._listify(key_list)
         if isinstance(key_list[0], Issue):
             key_list = [i.key for i in key_list]
-        result = []
+        result = ResultListExt()
         for k in key_list:
             if k not in self.__issue_cache:
                 result.append(k)
@@ -289,7 +289,7 @@ class JIRA_EXT(JIRA):
     def load_issues_from_file(self, path):
         with open(path, 'r') as f:
             raw = json.load(f)
-            return [Issue(self._options, self._session, r) for r in raw]
+            return ResultListExt([Issue(self._options, self._session, r) for r in raw])
 
     def get_uncached_issues_jql_request(self, issue_list):
         issues = self.get_uncached_issues(issue_list)
@@ -310,9 +310,9 @@ class JIRA_EXT(JIRA):
         '''
         Crawls all the issues from the given list of issues and searches all linked issues
         '''
-        issue_list = []
+        issue_list = ResultListExt()
 
-        linked_issues = []
+        linked_issues = ResultListExt()
         # get all links of first level
         for i in issues:
             linked_issues += self.get_linked_issues(i, link_type=link_type_regex, load_linked_issues=False)
@@ -347,8 +347,8 @@ class JIRA_EXT(JIRA):
         '''
         Crawls all the issues from the given list of issues and searches all linked issues
         '''
-        issue_hierarchy = []
-        issue_cache = []
+        issue_hierarchy = ResultListExt()
+        issue_cache = ResultListExt()
 
         for i in issues:
             li = [li for li in self.get_linked_issues(i, link_type=link_type_regex, load_linked_issues=False)]
