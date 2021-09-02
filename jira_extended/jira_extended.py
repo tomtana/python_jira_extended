@@ -618,7 +618,7 @@ class ResultListExt(ResultList):
         for i in self:
             d = {}
             i_flat_raw = self.flatten_fields(i.raw)
-            for key, properties in mapping:
+            for key, properties in mapping.items():
                 field = properties.get("field")
                 normalized_name = properties.get("normalized_name", key)
                 fun = properties.get("function")
