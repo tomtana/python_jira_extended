@@ -1,5 +1,6 @@
 import collections
-from functools import lru_cache
+from functools import lru_cache, reduce
+from operator import getitem
 import pandas as pd
 from jira import JIRA
 from jira.client import translate_resource_args, ResultList
@@ -199,9 +200,9 @@ class JIRA_EXT(JIRA):
     def search_issues(self, *args, cache_result=True, translate_custom_field_name=True, **kwargs):
         issues = super(JIRA_EXT, self).search_issues(*args, **kwargs)
         if translate_custom_field_name:
-            issues = ResultList([IssueExt(i, field_mapping=self.get_field_mapping(i), jira_ext=self) for i in issues])
+            issues = ResultListExt([IssueExt(i, field_mapping=self.get_field_mapping(i), jira_ext=self) for i in issues])
         else:
-            issues = ResultList([IssueExt(i, jira_ext=self) for i in issues])
+            issues = ResultListExt([IssueExt(i, jira_ext=self) for i in issues])
         if cache_result:
             self.update_issue_cache(issues)
         return issues
@@ -564,6 +565,69 @@ class IssueExt(Issue):
         Type:      method
         """
         self.__jira.add_comment(self.key, body, visibility=visibility, is_internal=is_internal)
+
+
+class ResultListExt(ResultList):
+    def __init__(self, mapping=None, **kwargs):
+        super(ResultListExt, self).__init__(**kwargs)
+        self.mapping = mapping
+
+    def raw(self):
+        """
+        export raw content of each issue
+        """
+        return [i.raw for i in self]
+
+    def raw_flattened(self):
+        def flatten_fields(raw):
+            ret_dict = {"fields": raw.get("fields")}
+            for key, value in raw.items():
+                if key != "fields":
+                    ret_dict[key] = value
+            return ret_dict
+
+        return [flatten_fields(i.raw) for i in self]
+
+    def normalized_json(self, _mapping=None):
+        """
+        Export normalized json. If mapping is explicitly given, self.mapping property is ignored
+
+        mapping must have structure:
+        "normalized_name": "name",
+        "function": function,
+        """
+
+        def getitem_from_dict(dataDict, mapList):
+            """Iterate nested dictionary"""
+            return reduce(getitem, mapList, dataDict)
+
+        mapping = self.mapping
+        if _mapping:
+            mapping = _mapping
+        if not mapping:
+            return self.raw_flattened()
+
+        normalized_list = []
+        for i in self.raw_flattened():
+            d = {}
+            for key, properties in mapping:
+                field = properties.get("field")
+                normalized_name = properties.get("normalized_name")
+                fun = properties.get("function")
+                field_content = getitem_from_dict(i.raw, field.split(",./"))
+                if field_content:
+                    if fun:
+                        d[normalized_name] = fun(field_content)
+                    else:
+                        d[normalized_name] = field_content
+            normalized_list.append(d)
+        return normalized_list
+
+    def normalized_df(self, _mapping=None):
+        normalized_json = self.normalized_json(_mapping=_mapping)
+        return pd.DataFrame(normalized_json)
+
+
 
 
 class CommentExt(Comment):
