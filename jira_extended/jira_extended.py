@@ -581,7 +581,7 @@ class ResultListExt(ResultList):
 
     def raw_flattened(self):
         def flatten_fields(raw):
-            ret_dict = {"fields": raw.get("fields")}
+            ret_dict = {**raw.get("fields")}
             for key, value in raw.items():
                 if key != "fields":
                     ret_dict[key] = value
@@ -602,16 +602,16 @@ class ResultListExt(ResultList):
             """Iterate nested dictionary"""
             return reduce(getitem, mapList, dataDict)
 
-        mapping = self.mapping
+        mapping = self.mapping["mapping"]
         if _mapping:
-            mapping = _mapping
+            mapping = _mapping["mapping"]
         if not mapping:
             return self.raw_flattened()
 
         normalized_list = []
         for i in self.raw_flattened():
             d = {}
-            for key, properties in mapping:
+            for key, properties in mapping["mapping"]:
                 field = properties.get("field")
                 normalized_name = properties.get("normalized_name")
                 fun = properties.get("function")
