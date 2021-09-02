@@ -580,14 +580,15 @@ class ResultListExt(ResultList):
         return [i.raw for i in self]
 
     def raw_flattened(self):
-        def flatten_fields(raw):
-            ret_dict = {**raw.get("fields")}
-            for key, value in raw.items():
-                if key != "fields":
-                    ret_dict[key] = value
-            return ret_dict
+        return [self.flatten_fields(i.raw) for i in self]
 
-        return [flatten_fields(i.raw) for i in self]
+    @staticmethod
+    def flatten_fields(raw):
+        ret_dict = {**raw.get("fields")}
+        for key, value in raw.items():
+            if key != "fields":
+                ret_dict[key] = value
+        return ret_dict
 
     def normalized_json(self, _mapping=None):
         """
@@ -609,18 +610,22 @@ class ResultListExt(ResultList):
             return self.raw_flattened()
 
         normalized_list = []
-        for i in self.raw_flattened():
+        for i in self:
             d = {}
+            i_flat_raw = self.flatten_fields(i.raw)
             for key, properties in mapping["mapping"]:
                 field = properties.get("field")
                 normalized_name = properties.get("normalized_name")
                 fun = properties.get("function")
-                field_content = getitem_from_dict(i.raw, field.split(",./"))
-                if field_content:
-                    if fun:
-                        d[normalized_name] = fun(field_content)
-                    else:
-                        d[normalized_name] = field_content
+                field_content = getitem_from_dict(i_flat_raw, field.split(",./"))
+                if field and fun:
+                    d[normalized_name] = fun(field_content)
+                elif field and not fun:
+                    d[normalized_name] = field_content
+                elif not field and fun:
+                    d[normalized_name] = fun(i)
+                else:
+                    raise ValueError("Mapping input doesnt contain field nor function")
             normalized_list.append(d)
         return normalized_list
 
