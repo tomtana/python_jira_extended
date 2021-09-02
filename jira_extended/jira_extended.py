@@ -620,7 +620,7 @@ class ResultListExt(ResultList):
             i_flat_raw = self.flatten_fields(i.raw)
             for key, properties in mapping["mapping"]:
                 field = properties.get("field")
-                normalized_name = properties.get("normalized_name")
+                normalized_name = properties.get("normalized_name", key)
                 fun = properties.get("function")
                 field_content = getitem_from_dict(i_flat_raw, field.split(",./"))
                 if field and fun:
