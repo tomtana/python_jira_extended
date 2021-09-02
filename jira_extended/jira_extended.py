@@ -59,7 +59,7 @@ class JIRA_EXT(JIRA):
         import re
         if not issue:
             print("issues is empty")
-        result = []
+        result = ResultListExt()
 
         links = issue.fields.issuelinks
         # if they have already linked features check if the naming is okay and all the defined features are there
@@ -104,7 +104,7 @@ class JIRA_EXT(JIRA):
         return result
 
     def search_issue_chunks_with_issuekeys(self, issue_keys, chunk_size=None):
-        result = []
+        result = ResultListExt()
         if issue_keys is None:
             raise IOError("A list of issue_keys needs to be passed!")
 
@@ -121,7 +121,7 @@ class JIRA_EXT(JIRA):
         return result
 
     def search_issue_chunks_with_jql(self, jql, chunk_size=None):
-        result = []
+        result = ResultListExt()
         if jql is None:
             raise IOError("An jql expression needs to be passed!")
 
