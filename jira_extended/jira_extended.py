@@ -200,7 +200,8 @@ class JIRA_EXT(JIRA):
     def search_issues(self, *args, cache_result=True, translate_custom_field_name=True, **kwargs):
         issues = super(JIRA_EXT, self).search_issues(*args, **kwargs)
         if translate_custom_field_name:
-            issues = ResultListExt([IssueExt(i, field_mapping=self.get_field_mapping(i), jira_ext=self) for i in issues])
+            issues = ResultListExt(
+                [IssueExt(i, field_mapping=self.get_field_mapping(i), jira_ext=self) for i in issues])
         else:
             issues = ResultListExt([IssueExt(i, jira_ext=self) for i in issues])
         if cache_result:
@@ -568,8 +569,8 @@ class IssueExt(Issue):
 
 
 class ResultListExt(ResultList):
-    def __init__(self, mapping=None, **kwargs):
-        super(ResultListExt, self).__init__(**kwargs)
+    def __init__(self, iterable=None, mapping=None, **kwargs):
+        super(ResultListExt, self).__init__(iterable, **kwargs)
         self.mapping = mapping
 
     def raw(self):
@@ -626,8 +627,6 @@ class ResultListExt(ResultList):
     def normalized_df(self, _mapping=None):
         normalized_json = self.normalized_json(_mapping=_mapping)
         return pd.DataFrame(normalized_json)
-
-
 
 
 class CommentExt(Comment):
